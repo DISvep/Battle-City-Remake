@@ -27,13 +27,11 @@ text_map = ["WWWWWWWWWWWWWWWW",
 
 
 def generate_map(map=text_map):
-    world_map = list()
+    world_map = pygame.sprite.Group()
 
     for y, row in enumerate(text_map):
         for x, char in enumerate(row):
             if char == 'W':
-                world_map.append(Wall(x * SIZE, y * SIZE, SIZE))
-
-    print(world_map)
+                world_map.add(Wall(x * SIZE, y * SIZE, SIZE))
 
     return world_map
