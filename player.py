@@ -1,5 +1,9 @@
 import pygame
+import logging
 
+# Налаштування логування
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 class GameSprite(pygame.sprite.Sprite):
     def __init__(self, player_image, player_x, player_y, player_speed=0):
@@ -38,15 +42,19 @@ class Player(GameSprite):
         if pressed_keys[pygame.K_w]:
             vel_y = -self.speed
             self.direction = "up"
+            logger.debug("Гравець натиснув 'W' - рух вгору")
         elif pressed_keys[pygame.K_s]:
             vel_y = self.speed
             self.direction = "down"
+            logger.debug("Гравець натиснув 'S' - рух вниз")
         elif pressed_keys[pygame.K_d]:
             vel_x = self.speed
             self.direction = "right"
+            logger.debug("Гравець натиснув 'D' - рух праворуч")
         elif pressed_keys[pygame.K_a]:
             vel_x = -self.speed
             self.direction = "left"
+            logger.debug("Гравець натиснув 'A' - рух ліворуч")
 
         # Оновлюємо зображення відповідно до напрямку
         self.image = self.images[self.direction]
@@ -55,10 +63,12 @@ class Player(GameSprite):
         self.rect.x += vel_x
         if pygame.sprite.spritecollide(self, walls, False):
             self.rect.x -= vel_x
+            logger.warning("Гравець зіткнувся зі стіною")
 
         self.rect.y += vel_y
         if pygame.sprite.spritecollide(self, walls, False):
             self.rect.y -= vel_y
+            logger.warning("Гравець зіткнувся зі стіною")
 
         self.rect.clamp_ip(scr.get_rect())
 
@@ -69,6 +79,7 @@ class Player(GameSprite):
                 new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10)
                 Player.bullets.add(new_bullet)
                 self.last_shot_time = now
+                logger.info("Гравець зробив постріл")
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -103,10 +114,12 @@ class Bullet(pygame.sprite.Sprite):
 
         if pygame.sprite.spritecollideany(self, walls):
             self.kill()
+            logger.debug("Куля зіткнулася зі стіною")
 
         # Видаляємо кулю, якщо вона виходить за межі екрану
         if self.rect.bottom < 0 or self.rect.top > 600 or self.rect.right < 0 or self.rect.left > 700:
             self.kill()
+            logger.debug("Куля вийшла за межі екрану")
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
