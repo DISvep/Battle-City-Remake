@@ -1,4 +1,5 @@
 import pygame
+from player import *
 
 
 class Wall(pygame.sprite.Sprite):
@@ -14,7 +15,7 @@ SIZE = 50
 
 text_map = ["WWWWWWWWWWWWWWWW",
             "W..............W",
-            "W..............W",
+            "W...P..........W",
             "W..............W",
             "W..............W",
             "W..............W",
@@ -28,10 +29,19 @@ text_map = ["WWWWWWWWWWWWWWWW",
 
 def generate_map(map=text_map):
     world_map = pygame.sprite.Group()
-
     for y, row in enumerate(text_map):
         for x, char in enumerate(row):
             if char == 'W':
                 world_map.add(Wall(x * SIZE, y * SIZE, SIZE))
-
+    
     return world_map
+
+
+def generate_player(map=text_map):
+    player = pygame.sprite.Group()
+    for y, row in enumerate(text_map):
+        for x, char in enumerate(row):
+            if char == 'P':
+                player = Player("textures/tank.png", x * SIZE, y * SIZE, SIZE, 5)
+
+    return player

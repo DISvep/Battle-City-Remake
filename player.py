@@ -1,18 +1,20 @@
 import pygame
 import logging
 
+
 # Налаштування логування
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+
 class GameSprite(pygame.sprite.Sprite):
-    def __init__(self, player_image, player_x, player_y, player_speed=0):
+    def __init__(self, player_image, x, y, player_hp = 100, player_speed=0):
         super().__init__()
         self.image = pygame.transform.scale(pygame.image.load(player_image), (50, 50))
         self.speed = player_speed
         self.rect = self.image.get_rect()
-        self.rect.x = player_x
-        self.rect.y = player_y
+        self.rect.x = x
+        self.rect.y = y
 
     def is_collide(self, sprite):
         return self.rect.colliderect(sprite.rect)
@@ -21,8 +23,8 @@ class GameSprite(pygame.sprite.Sprite):
 class Player(GameSprite):
     bullets = pygame.sprite.Group()
 
-    def __init__(self, player_image, player_x, player_y, player_speed=0):
-        super().__init__(player_image, player_x, player_y, player_speed)
+    def __init__(self, player_image, x, y, player_hp = 100, player_speed=0):
+        super().__init__(player_image, x, y, player_hp, player_speed)
         self.base_image = pygame.transform.scale(pygame.image.load(player_image), (50, 50))
         self.images = {
             "up": pygame.transform.rotate(self.base_image, 180),
@@ -31,9 +33,14 @@ class Player(GameSprite):
             "right": pygame.transform.rotate(self.base_image, 90)
         }
         self.direction = "up"
-        self.rect = self.image.get_rect(x=player_x, y=player_y)
+        self.rect = self.image.get_rect(x=x, y=y)
         self.shoot_cooldown = 1000  # секунди між пострілами
         self.last_shot_time = pygame.time.get_ticks()
+        self.player_hp = 100
+
+    def take_damage(self, dmg):
+        self.player_hp -= dmg
+        logger.info(f"Гравець отримав {dmg} шкоди. Здоров'я: {self.player_hp}")
 
     def update(self, scr, walls):
         pressed_keys = pygame.key.get_pressed()
@@ -70,7 +77,10 @@ class Player(GameSprite):
             self.rect.y -= vel_y
             logger.warning("Гравець зіткнувся зі стіною")
 
+
         self.rect.clamp_ip(scr.get_rect())
+
+        
 
         # Стрільба
         if pressed_keys[pygame.K_SPACE]:
@@ -86,7 +96,7 @@ class Player(GameSprite):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, bullet_image, x, y, direction, speed):
+    def __init__(self, bullet_image, x, y, direction, speed, dmg = 25):
         super().__init__()
 
         self.base_image = pygame.transform.scale(pygame.image.load(bullet_image).convert_alpha(), (100, 100))
@@ -102,7 +112,7 @@ class Bullet(pygame.sprite.Sprite):
         self.direction = direction
         self.speed = speed
 
-    def update(self, walls):
+    def update(self, walls, player):
         if self.direction == "up":
             self.rect.y -= self.speed
         elif self.direction == "down":
@@ -111,6 +121,10 @@ class Bullet(pygame.sprite.Sprite):
             self.rect.x -= self.speed
         elif self.direction == "right":
             self.rect.x += self.speed
+        elif self.rect.colliderect(player.rect):
+            player.take_damage(self.dmg)
+            self.kill()
+            logger.info("Куля влучила в гравця")
 
         if pygame.sprite.spritecollideany(self, walls):
             self.kill()
@@ -120,6 +134,6 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0 or self.rect.top > 600 or self.rect.right < 0 or self.rect.left > 700:
             self.kill()
             logger.debug("Куля вийшла за межі екрану")
-
+    
     def draw(self, surface):
         surface.blit(self.image, self.rect)

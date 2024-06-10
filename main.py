@@ -13,7 +13,7 @@ FPS = 60
 scr = pygame.display.set_mode(SIZE)
 world_map = map.generate_map()
 
-plr = player.Player("textures/tank.png", 50, 50, 2)
+plr = map.generate_player()
 
 game = True
 clock = pygame.time.Clock()
@@ -31,7 +31,7 @@ while game:
     plr.draw(scr)
 
     for bullet in plr.bullets:
-        bullet.update(world_map)
+        bullet.update(world_map, plr)
         bullet.draw(scr)
 
     pygame.display.flip()
