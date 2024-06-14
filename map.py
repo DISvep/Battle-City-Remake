@@ -1,30 +1,6 @@
 import pygame
-from player import *
-
-
-class Wall(pygame.sprite.Sprite):
-    def __init__(self, x, y, size):
-        super().__init__()
-        self.img = pygame.Surface((size, size))  # потрібна текстурка
-        self.img.fill((120, 60, 0))
-        self.rect = self.img.get_rect()
-        self.rect.x, self.rect.y = x, y
-
-
-SIZE = 50
-
-text_map = ["WWWWWWWWWWWWWWWW",
-            "W..............W",
-            "W...P..........W",
-            "W..............W",
-            "W..............W",
-            "W..............W",
-            "W..............W",
-            "W..............W",
-            "W..............W",
-            "W.......W......W",
-            "W..............W",
-            "WWWWWWWWWWWWWWWW"]
+from objects import *
+from settings import *
 
 
 def generate_map(map=text_map):
@@ -32,8 +8,8 @@ def generate_map(map=text_map):
     for y, row in enumerate(text_map):
         for x, char in enumerate(row):
             if char == 'W':
-                world_map.add(Wall(x * SIZE, y * SIZE, SIZE))
-    
+                world_map.add(Wall(x * SIZE_CELL, y * SIZE_CELL, SIZE_CELL))
+
     return world_map
 
 
@@ -42,6 +18,16 @@ def generate_player(map=text_map):
     for y, row in enumerate(text_map):
         for x, char in enumerate(row):
             if char == 'P':
-                player = Player("textures/tank.png", x * SIZE, y * SIZE, SIZE, 5)
+                player = Player("textures/tank.png", x * SIZE_CELL, y * SIZE_CELL)
 
     return player
+
+
+def generate_enemy(player, walls, map=text_map):
+    enemies = pygame.sprite.Group()
+    for y, row in enumerate(text_map):
+        for x, char in enumerate(row):
+            if char == "E":
+                enemies.add(Enemy("textures/enemy.png", x * SIZE_CELL, y * SIZE_CELL, walls, player))
+
+    return enemies
