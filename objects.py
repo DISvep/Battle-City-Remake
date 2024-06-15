@@ -168,12 +168,12 @@ class FatEnemy(Enemy):
         super().__init__(image, x, y, walls, player, hp=hp, speed=speed)
         self.shoot_cooldown = 3500
 
-        def shoot(self):
-            now = pygame.time.get_ticks()
-            if now - self.last_shot_time >= self.shoot_cooldown:
-                new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10, self, dmg=50)
-                Player.bullets.add(new_bullet)
-                self.last_shot_time = now
+    def shoot(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_shot_time >= self.shoot_cooldown:
+            new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10, self, dmg=50)
+            Player.bullets.add(new_bullet)
+            self.last_shot_time = now
 
 
 class Bullet(pygame.sprite.Sprite):
