@@ -14,10 +14,10 @@ text_map = ["WWWWWWWWWWWWWWWW",
             "W........E.....W",
             "W....WWWWWWWWWWW",
             "W..............W",
-            "W..............W",
+            "W.........F....W",
             "W.WWWWWWWWWWW..W",
             "W.......W......W",
-            "W..........WWW.W",
+            "W.S........WWW.W",
             "WWWWWWWWWWWWWWWW"]
 SCENE = "main"
 

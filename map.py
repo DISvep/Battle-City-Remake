@@ -29,5 +29,9 @@ def generate_enemy(player, walls, map=text_map):
         for x, char in enumerate(row):
             if char == "E":
                 enemies.add(Enemy("textures/enemy.png", x * SIZE_CELL, y * SIZE_CELL, walls, player))
+            if char == "S":
+                enemies.add(FastEnemy("textures/fast_enemy.png", x * SIZE_CELL, y * SIZE_CELL, walls, player))
+            if char == "F":
+                enemies.add(FatEnemy("textures/fat_enemy.png", x * SIZE_CELL, y * SIZE_CELL, walls, player))
 
     return enemies

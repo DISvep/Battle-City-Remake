@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class Tank(pygame.sprite.Sprite):
-    def __init__(self, player_image, x, y, hp=100, speed=3.5):
+    def __init__(self, image, x, y, hp=100, speed=3.5):
         super().__init__()
 
-        self.image = pygame.transform.scale(pygame.image.load(player_image), (45, 45))
+        self.image = pygame.transform.scale(pygame.image.load(image), (45, 45))
         self.images = {
             "up": pygame.transform.rotate(self.image, 180),
             "down": self.image,
@@ -66,7 +66,7 @@ class Tank(pygame.sprite.Sprite):
 class Player(Tank):
     bullets = pygame.sprite.Group()
 
-    def __init__(self, player_image, x, y, hp=100, speed=3.5):
+    def __init__(self, player_image, x, y, hp=200, speed=3.5):
         super().__init__(player_image, x, y, hp, speed)
         self.last_shot_time = pygame.time.get_ticks()
 
@@ -114,8 +114,8 @@ class Player(Tank):
 class Enemy(Tank):
     bullets = pygame.sprite.Group()
 
-    def __init__(self, player_image, x, y, walls, player, hp=100, speed=2.5):
-        super().__init__(player_image, x, y, hp, speed)
+    def __init__(self, image, x, y, walls, player, hp=100, speed=2.5):
+        super().__init__(image, x, y, hp, speed)
         self.last_shot_time = pygame.time.get_ticks()
         self.walls = walls
         self.hp = 50
@@ -152,6 +152,28 @@ class Enemy(Tank):
 
         scr.blit(self.image, self.rect)
         self.AI.update(scr)
+
+
+class FastEnemy(Enemy):
+    bullets = pygame.sprite.Group()
+
+    def __init__(self, image, x, y, walls, player, hp=25, speed=3.5):
+        super().__init__(image, x, y, walls, player, hp=hp, speed=speed)
+
+
+class FatEnemy(Enemy):
+    bullets = pygame.sprite.Group()
+
+    def __init__(self, image, x, y, walls, player, hp=200, speed=1):
+        super().__init__(image, x, y, walls, player, hp=hp, speed=speed)
+        self.shoot_cooldown = 3500
+
+        def shoot(self):
+            now = pygame.time.get_ticks()
+            if now - self.last_shot_time >= self.shoot_cooldown:
+                new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10, self, dmg=50)
+                Player.bullets.add(new_bullet)
+                self.last_shot_time = now
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -195,7 +217,9 @@ class Bullet(pygame.sprite.Sprite):
         elif self.direction == "right":
             self.rect.x += self.speed
 
-        if pygame.sprite.spritecollideany(self, walls):
+        collides_walls = pygame.sprite.spritecollide(self, walls, False)
+        for wall in collides_walls:
+            wall.take_damage(self.dmg)
             self.kill()
             logger.debug("Куля зіткнулася зі стіною")
 
@@ -221,3 +245,9 @@ class Wall(pygame.sprite.Sprite):
         self.img.fill((120, 60, 0))
         self.rect = self.img.get_rect()
         self.rect.x, self.rect.y = x, y
+        self.hp = 50
+
+    def take_damage(self, dmg):
+        self.hp -= dmg
+        if self.hp <= 0:
+            self.kill()
