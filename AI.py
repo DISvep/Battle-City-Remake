@@ -22,7 +22,7 @@ class Enemy:
         self.direction = random.choice(self.directions)
         self.last_plr_pos = (0, 0)
 
-    def cast_rays(self, start):
+    def cast_rays(self, start, scr):
         directions = {
             "up": (0, -1),
             "down": (0, 1),
@@ -71,7 +71,7 @@ class Enemy:
 
         self.move()
 
-        self.cast_rays((self.me.rect.x, self.me.rect.y))
+        self.cast_rays((self.me.rect.x, self.me.rect.y),scr)
 
         self.me.image = self.me.images[self.me.direction]
 

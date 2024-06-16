@@ -8,7 +8,7 @@ def generate_map(map=text_map):
     for y, row in enumerate(text_map):
         for x, char in enumerate(row):
             if char == 'W':
-                world_map.add(Wall(x * SIZE_CELL, y * SIZE_CELL, SIZE_CELL))
+                world_map.add(Wall(x * SIZE_CELL, y * SIZE_CELL))
 
     return world_map
 

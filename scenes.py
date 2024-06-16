@@ -10,7 +10,7 @@ def scenes(scr, plr, world_map, enemies, entities, clock):
     SCENE = get_scene()
 
     if SCENE == "main":
-        scr.fill(WHITE)
+        scr.fill(BACKGROUND)
 
         for wall in world_map:
             scr.blit(wall.img, wall.rect)
@@ -25,6 +25,8 @@ def scenes(scr, plr, world_map, enemies, entities, clock):
         for bullet in plr.bullets:
             bullet.update(world_map, entities)
             bullet.draw(scr)
+
+        damage_ui.scr_update(scr)
 
         pygame.display.flip()
         clock.tick(FPS)
