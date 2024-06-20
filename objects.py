@@ -3,6 +3,8 @@ import AI
 import UI
 from logger import *
 from settings import *
+import time
+from abc import ABC, abstractmethod
 
 
 class Tank(pygame.sprite.Sprite):
@@ -16,7 +18,9 @@ class Tank(pygame.sprite.Sprite):
             "right": pygame.transform.rotate(self.image, -90),
             "left": pygame.transform.rotate(self.image, 90)
         }
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()  # pygame.Rect(left=x, top=y, width=35, height=35)
+        self.rect.width = 35
+        self.rect.height = 35
         self.rect.x, self.rect.y = x, y
 
         self.direction = "up"
@@ -28,6 +32,8 @@ class Tank(pygame.sprite.Sprite):
 
         self.hp = UI.Health(hp)
         self.hp.add_observer(damage_ui)
+
+        self.boosts_group = None
 
         self.shoot_cooldown = 1000  # секунди між пострілами
 
@@ -102,6 +108,10 @@ class Player(Tank):
 
         self.check_obstacles(walls)
 
+        # boosts_hit = pygame.sprite.spritecollide(self, self.boosts_group, True)
+        # for boost in boosts_hit:
+        #     boost.apply_boost(self)
+
         self.rect.clamp_ip(scr.get_rect())
 
         # Стрільба
@@ -166,6 +176,7 @@ class FastEnemy(Enemy):
 
     def __init__(self, image, x, y, walls, player, hp=25, speed=3.5):
         super().__init__(image, x, y, walls, player, hp=hp, speed=speed)
+        self.AI = AI.AllSeeingEnemy(self.rect.centerx, self.rect.centery, self.walls, player, self)
 
 
 class FatEnemy(Enemy):
@@ -187,7 +198,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, bullet_image, x, y, direction, speed, owner, dmg=25):
         super().__init__()
 
-        self.base_image = pygame.transform.scale(pygame.image.load(bullet_image).convert_alpha(), (100, 10))
+        self.base_image = pygame.transform.scale(pygame.image.load(bullet_image).convert_alpha(), (40, 10))
         self.images = {
             "up": pygame.transform.rotate(self.base_image, -90),
             "down": pygame.transform.rotate(self.base_image, 90),
@@ -258,3 +269,76 @@ class Wall(pygame.sprite.Sprite):
         self.hp.take_damage(dmg, self.rect.x, self.rect.y)
         if self.hp.hp <= 0:
             self.kill()
+
+
+class Boost(pygame.sprite.Sprite, ABC):
+    def __init__(self, image, x, y, duration, *args):
+        super().__init__()
+        self.image = pygame.transform.scale(pygame.image.load(image), (SIZE_CELL, SIZE_CELL))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x, y
+        self.args = args
+        self.duration = duration
+        self.start_time = 0
+        self.active = False
+
+    @abstractmethod
+    def apply_boost(self, player):
+        pass
+        # if not self.active:
+        #     if self.boost_type == "hp":
+        #         player.apply_hp_boost(*self.args)
+        #     elif self.boost_type == "speed":
+        #         player.apply_speed_boost(*self.args)
+        #     self.start_time = time.time()
+        #     self.active = True
+
+    def update(self, player, scr):
+        if not self.active:
+            scr.blit(self.image, self.rect)
+        if self.rect.colliderect(player.rect) and not self.active:
+            self.apply_boost(player)
+        if self.active:
+            if not self.is_active():
+                self.deactivate_boost(player)
+
+    @abstractmethod
+    def deactivate_boost(self, player):
+        pass
+    #     if self.boost_type == "speed":
+    #         player.remove_speed_boost(*self.args)
+    #     self.kill()
+    #     self.active = False
+
+    def is_active(self):
+        now = pygame.time.get_ticks()
+        print(self.start_time, self.duration, self.start_time+self.duration, now)
+        return self.active and self.start_time + self.duration > now
+
+
+class HealthBoost(Boost):
+    def __init__(self, image, x, y, duration=0, *args):
+        super().__init__(image, x, y, duration, args)
+
+    def apply_boost(self, player):
+        player.hp.take_damage(-(self.args[0][0]), self.rect.centerx, self.rect.centery)
+        self.active = True
+
+    def deactivate_boost(self, player):
+        self.active = False
+        self.kill()
+
+
+class SpeedBoost(Boost):
+    def __init__(self, image, x, y, duration=30, *args):
+        super().__init__(image, x, y, duration, args)
+
+    def apply_boost(self, player):
+        if not self.active:
+            player.speed += self.args[0][0]
+            self.start_time = pygame.time.get_ticks()
+            self.active = True
+
+    def deactivate_boost(self, player):
+        player.speed -= self.args[0][0]
+        self.kill()

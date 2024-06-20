@@ -18,3 +18,7 @@ def logger(func):
             called_before = True
         return result
     return wrapper
+
+
+def log(message):
+    logg.info(f"{message}")

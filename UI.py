@@ -1,6 +1,11 @@
 from abc import ABC, abstractmethod
 import pygame
 import settings
+import logger
+
+
+pygame.font.init()
+font = pygame.font.SysFont(None, 80)
 
 
 class Text(pygame.sprite.Sprite):
@@ -53,7 +58,9 @@ class PlayerHealthBar(Observer):
         self.hp = message[0]
 
     def hp_color(self):
-        if self.hp > self.max_hp // 2:
+        if self.hp > self.max_hp:
+            return settings.BLUE
+        elif self.hp > self.max_hp // 2:
             return settings.GREEN
         elif self.hp >= self.max_hp // 4:
             return settings.YELLOW
@@ -143,3 +150,21 @@ if __name__ == "__main__":
 
         pygame.display.flip()
         clock.tick(settings.FPS)
+
+
+def create_button(screen, msg, x, y, w, h, ic, ac, action):
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    if x + w > mouse[0] > x and y + h > mouse[1] > y:
+        pygame.draw.rect(screen, ac, (x, y, w, h))
+        if click[0] == 1 and action is not None:
+            logger.log(f"Гравець натиснув кнопку, викликаю функцію: {action.__name__}")
+            action()
+    else:
+        pygame.draw.rect(screen, ic, (x, y, w, h))
+
+    text_surf = font.render(msg, True, settings.WHITE)
+    text_rect = text_surf.get_rect()
+    text_rect.center = ((x + (w / 2)), (y + (h / 2)))
+    screen.blit(text_surf, text_rect)
