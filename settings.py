@@ -40,8 +40,8 @@ LEVELS = [
     
     ["WWWWWWWWWWWWWWWW",
      "W..P...........W",
-     "W.............W",
-     "W...WWWWWWW.B...W",
+     "W..............W",
+     "W...WWWWWWW.B..W",
      "W...W.....W....W",
      "W...W..E..W....W",
      "W...W.....W....W",
@@ -52,20 +52,46 @@ LEVELS = [
      "WWWWWWWWWWWWWWWW"],
 
     ["WWWWWWWWWWWWWWWW",
-     "W..P...B.......W",
-     "W............E.W",
-     "W...WWWWWWW....W",
-     "W...W.....W....W",
-     "W.B.W..E..W....W",
-     "W...W.....W....W",
-     "W...WWWWWWW.B..W",
+     "W......P.......W",
+     "W.W.WWWWWWWW.W.W",
+     "W.W....BE....W.W",
+     "W.W.WWWWWWWW.W.W",
+     "W......EB......W",
+     "W.W.WWWWWWWW.W.W",
+     "W.W....BE....W.W",
+     "W.W.WWWWWWWW.W.W",
      "W..............W",
-     "W.B...E........W",
-     "W............E.W",
+     "W..............W",
+     "WWWWWWWWWWWWWWWW"],
+
+    ["WWWWWWWWWWWWWWWW",
+     "W....W....W....W",
+     "W.E..W.P..W.E..W",
+     "W..B.W..B.W..B.W",
+     "W....W....W....W",
+     "WWWWWWWWWWWWWWWW",
+     "W....W....W....W",
+     "W....W....W....W",
+     "W.E..W.E..W.E..W",
+     "W..B.W..B.W..B.W",
+     "W....W....W....W",
+     "WWWWWWWWWWWWWWWW"],
+
+    ["WWWWWWWWWWWWWWWW",
+     "WB............BW",
+     "W..BWW....WWB..W",
+     "W..W....BW..W..W",
+     "W..W.WWWWW..W..W",
+     "WEWE.BW.PW..EWEW",
+     "WEWE..WB.WB.EWEW",
+     "W..W..WWWWW.W..W",
+     "W..W..WB....W..W",
+     "W..BWW....WWB..W",
+     "WB............BW",
      "WWWWWWWWWWWWWWWW"]
-    
-    # Додайте більше рівнів за потреби
 ]
+    # Додайте більше рівнів за потреби
+
 CURRENT_LEVEL = 0
 SCENE = "menu"
 damage_ui = UI.DealDamage()

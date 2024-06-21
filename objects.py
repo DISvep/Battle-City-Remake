@@ -29,6 +29,9 @@ class Tank(pygame.sprite.Sprite):
 
         self.stuck = False
 
+        self.bullet_speed = 10
+        self.dmg = 25
+
         self.render = True
 
         self.hp = UI.Health(hp)
@@ -109,17 +112,13 @@ class Player(Tank):
 
         self.check_obstacles(walls)
 
-        # boosts_hit = pygame.sprite.spritecollide(self, self.boosts_group, True)
-        # for boost in boosts_hit:
-        #     boost.apply_boost(self)
-
         self.rect.clamp_ip(scr.get_rect())
 
         # Стрільба
         if pressed_keys[pygame.K_SPACE]:
             now = pygame.time.get_ticks()
             if now - self.last_shot_time >= self.shoot_cooldown:
-                new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10, self)
+                new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, self.bullet_speed, self, dmg=self.dmg)
                 Player.bullets.add(new_bullet)
                 self.last_shot_time = now
 
@@ -165,7 +164,7 @@ class Enemy(Tank):
     def shoot(self):
         now = pygame.time.get_ticks()
         if now - self.last_shot_time >= self.shoot_cooldown:
-            new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10, self)
+            new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, self.bullet_speed, self, dmg=self.dmg)
             Player.bullets.add(new_bullet)
             self.last_shot_time = now
 
@@ -192,13 +191,8 @@ class FatEnemy(Enemy):
     def __init__(self, x, y, walls, player, hp=300, speed=1):
         super().__init__(x, y, walls, player, hp=hp, speed=speed, image="textures/fat_enemy.png")
         self.shoot_cooldown = 3500
-
-    def shoot(self):
-        now = pygame.time.get_ticks()
-        if now - self.last_shot_time >= self.shoot_cooldown:
-            new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10, self, dmg=50)
-            Player.bullets.add(new_bullet)
-            self.last_shot_time = now
+        self.bullet_speed = 8
+        self.dmg = 50
 
 
 class SimpleEnemyFactory(Factory):
@@ -354,6 +348,21 @@ class SpeedBoost(Boost):
         self.kill()
 
 
+class DamageBoost(Boost):
+    def __init__(self, x, y, duration=5000, *args):
+        super().__init__('textures/damage.png', x, y, duration, args)
+
+    def apply_boost(self, player):
+        if not self.active:
+            player.dmg += self.args[0][0]
+            self.start_time = pygame.time.get_ticks()
+            self.active = True
+
+    def deactivate_boost(self, player):
+        player.dmg -= self.args[0][0]
+        self.kill()
+
+
 class HealthBoostFactory(Factory):
     def create(self, *args):
         return HealthBoost(*args, 0, 50)
@@ -362,4 +371,9 @@ class HealthBoostFactory(Factory):
 class SpeedBoostFactory(Factory):
     def create(self, *args):
         return SpeedBoost(*args, 3000, 5)
+
+
+class DamageBoostFactory(Factory):
+    def create(self, *args):
+        return DamageBoost(*args, 3000, 25)
 

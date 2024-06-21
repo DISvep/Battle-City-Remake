@@ -45,7 +45,7 @@ def generate_boosts():
     for y, row in enumerate(current_level):
         for x, char in enumerate(row):
             if char == "B":
-                factories = [SpeedBoostFactory(), HealthBoostFactory()]
+                factories = [SpeedBoostFactory(), HealthBoostFactory(), DamageBoostFactory()]
                 factory = random.choice(factories)
 
                 boost = factory.create(x * SIZE_CELL, y * SIZE_CELL)

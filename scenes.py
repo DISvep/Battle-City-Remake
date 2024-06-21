@@ -5,6 +5,7 @@ import pygame
 import options
 import logger
 import UI
+import os
 
 pygame.font.init()
 
@@ -73,6 +74,7 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
                     return restart_game(scr)
                 elif button_rects[1][1].collidepoint(mouse_pos):
                     logger.log("Гравець нажав Level designer")
+                    os.system('python lvl_designer.py')
                 elif button_rects[2][1].collidepoint(mouse_pos):
                     logger.log("Гравець нажав Options")
                     options.show_options_menu(scr, WIDTH, HEIGHT)
