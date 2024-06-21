@@ -29,6 +29,8 @@ class Tank(pygame.sprite.Sprite):
 
         self.stuck = False
 
+        UI.play_sound('sounds/tank.mp3', 0.1, loops=-1, channel=True)
+
         self.bullet_speed = 10
         self.dmg = 25
 
@@ -188,7 +190,7 @@ class FastEnemy(Enemy):
 class FatEnemy(Enemy):
     bullets = pygame.sprite.Group()
 
-    def __init__(self, x, y, walls, player, hp=300, speed=1):
+    def __init__(self, x, y, walls, player, hp=200, speed=1):
         super().__init__(x, y, walls, player, hp=hp, speed=speed, image="textures/fat_enemy.png")
         self.shoot_cooldown = 3500
         self.bullet_speed = 8
@@ -237,6 +239,8 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(centerx=self.x, centery=self.y)
         self.direction = direction
 
+        UI.play_sound('sounds/shot.wav', 0.3)
+
         self.speed = speed
         self.dmg = dmg
         self.owner = owner
@@ -261,6 +265,7 @@ class Bullet(pygame.sprite.Sprite):
         for sprite in collides:
             if sprite != self.owner and isinstance(sprite, Tank):
                 sprite.take_damage(self.dmg)
+                UI.play_sound('sounds/hit.mp3', 0.4)
                 self.kill()
 
         # Видаляємо кулю, якщо вона виходить за межі екрану

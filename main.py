@@ -2,6 +2,7 @@ import pygame
 import scenes
 import settings
 import map
+import UI
 import moviepy.editor
 
 pygame.init()

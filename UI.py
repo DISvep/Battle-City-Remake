@@ -5,7 +5,21 @@ import logger
 
 
 pygame.font.init()
+pygame.mixer.init()
 font = pygame.font.SysFont(None, 80)
+
+
+def play_sound(path, volume, loops=1, channel=False):
+    if channel:
+        sound = pygame.mixer.Sound(path)
+        sound.set_volume(volume)
+
+        channel = pygame.mixer.find_channel(True)
+        channel.play(sound, loops=loops)
+    else:
+        pygame.mixer.music.load(path)
+        pygame.mixer.music.set_volume(volume)
+        pygame.mixer.music.play(loops)
 
 
 class Text(pygame.sprite.Sprite):
