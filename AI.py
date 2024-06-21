@@ -2,6 +2,7 @@ import random
 import pygame
 from settings import *
 import heapq
+from abc import ABC, abstractmethod
 
 
 def heuristic(a, b):
@@ -53,6 +54,12 @@ class Pixel(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(x=x, y=y)
 
 
+class Factory(ABC):
+    @abstractmethod
+    def create(self, *args):
+        pass
+
+
 class Enemy:
     def __init__(self, x, y, walls, player, me):
         self.x, self.y = x, y
@@ -69,6 +76,7 @@ class Enemy:
         self.path = []
         self.step = None
         self.pixels = pygame.sprite.Group()
+        self.text_map = get_current_text_map()
 
     def cast_rays(self, start, scr):
         directions = {
@@ -148,6 +156,7 @@ class Enemy:
             self.me.go_down()
 
     def update(self, scr):
+        self.text_map = get_current_text_map()
         if self.me.stuck and not self.saw_player:
             self.direction = random.choice(self.directions)
             self.me.stuck = False
@@ -168,7 +177,7 @@ class Enemy:
         if self.all_seeing:
             self.last_plr_pos = (self.player.rect.y, self.player.rect.x)
             self.text_plr_pos = get_text_pos(*self.last_plr_pos)
-            self.path = find_path(text_map, get_text_pos(self.me.rect.y, self.me.rect.x), self.text_plr_pos)
+            self.path = find_path(self.text_map, get_text_pos(self.me.rect.y, self.me.rect.x), self.text_plr_pos)
             if self.path:
                 for step in range(len(self.path)):
                     self.path[step] = self.path[step][0]*SIZE_CELL + SIZE_CELL/2, self.path[step][1]*SIZE_CELL + SIZE_CELL/2
@@ -179,7 +188,7 @@ class Enemy:
             if not self.all_seeing:
                 self.last_plr_pos = (self.player.rect.y, self.player.rect.x)
                 self.text_plr_pos = get_text_pos(*self.last_plr_pos)
-                self.path = find_path(text_map, get_text_pos(self.me.rect.bottom, self.me.rect.right), self.text_plr_pos)
+                self.path = find_path(self.text_map, get_text_pos(self.me.rect.bottom, self.me.rect.right), self.text_plr_pos)
                 if self.path:
                     for step in range(len(self.path)):
                         self.path[step] = self.path[step][0] * SIZE_CELL + SIZE_CELL / 2, self.path[step][1] * SIZE_CELL + SIZE_CELL / 2
@@ -190,3 +199,14 @@ class AllSeeingEnemy(Enemy):
     def __init__(self, x, y, walls, player, me):
         super().__init__(x, y, walls, player, me)
         self.all_seeing = True
+
+
+class SimpleAiFactory(Factory):
+    def create(self, *args):
+        return Enemy(*args)
+
+
+class AllSeeingAiFactory(Factory):
+    def create(self, *args):
+        return AllSeeingEnemy(*args)
+

@@ -24,18 +24,49 @@ BG_COLOR = (30, 30, 30)
 wall = pygame.transform.scale(pygame.image.load('textures/wall.jpg'), (SIZE_CELL, SIZE_CELL))
 SHOW_FPS = False
 VOLUME = 0.5
-text_map = ["WWWWWWWWWWWWWWWW",
-            "W......W....B..W",
-            "W...P..........W",
-            "WWWWWWWWWWWW...W",
-            "W........E.....W",
-            "W..U.WWWWWWWWWWW",
-            "W..............W",
-            "W.........F....W",
-            "W.WWWWWWWWWWW..W",
-            "W.......W......W",
-            "W.S........WWW.W",
-            "WWWWWWWWWWWWWWWW"]
+LEVELS = [
+    ["WWWWWWWWWWWWWWWW",
+     "W......W....B..W",
+     "W...P..........W",
+     "WWWWWWWWWWWW...W",
+     "W........E.....W",
+     "W..B.WWWWWWWWWWW",
+     "W..............W",
+     "W.........E....W",
+     "W.WWWWWWWWWWW..W",
+     "W.......W......W",
+     "W.E........WWW.W",
+     "WWWWWWWWWWWWWWWW"],
+    
+    ["WWWWWWWWWWWWWWWW",
+     "W..P...........W",
+     "W.............W",
+     "W...WWWWWWW.B...W",
+     "W...W.....W....W",
+     "W...W..E..W....W",
+     "W...W.....W....W",
+     "W...WWWWWWW....W",
+     "W..............W",
+     "W.....E........W",
+     "W.B............W",
+     "WWWWWWWWWWWWWWWW"],
+
+    ["WWWWWWWWWWWWWWWW",
+     "W..P...B.......W",
+     "W............E.W",
+     "W...WWWWWWW....W",
+     "W...W.....W....W",
+     "W.B.W..E..W....W",
+     "W...W.....W....W",
+     "W...WWWWWWW.B..W",
+     "W..............W",
+     "W.B...E........W",
+     "W............E.W",
+     "WWWWWWWWWWWWWWWW"]
+    
+    # Додайте більше рівнів за потреби
+]
+CURRENT_LEVEL = 0
 SCENE = "menu"
 damage_ui = UI.DealDamage()
 
@@ -68,3 +99,14 @@ def change_FPS_show(value):
     global FPS
 
     FPS = value
+
+def next_level():
+    global CURRENT_LEVEL
+    CURRENT_LEVEL += 1
+    if CURRENT_LEVEL >= len(LEVELS):
+        CURRENT_LEVEL = 0  # Повертаємося до першого рівня, якщо всі пройдені
+    print(f"Перехід на рівень {CURRENT_LEVEL}")
+    return LEVELS[CURRENT_LEVEL]
+
+def get_current_text_map():
+    return LEVELS[CURRENT_LEVEL]

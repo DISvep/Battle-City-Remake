@@ -4,6 +4,7 @@ import UI
 from logger import *
 from settings import *
 import time
+import random
 from abc import ABC, abstractmethod
 
 
@@ -127,14 +128,23 @@ class Player(Tank):
         surface.blit(self.image, self.rect)
 
 
+class Factory(ABC):
+    @abstractmethod
+    def create(self, *args):
+        pass
+
+
 class Enemy(Tank):
     bullets = pygame.sprite.Group()
 
-    def __init__(self, image, x, y, walls, player, hp=50, speed=2.5):
+    def __init__(self, x, y, walls, player, hp=50, speed=2.5, image='textures/enemy.png'):
         super().__init__(image, x, y, hp, speed)
         self.last_shot_time = pygame.time.get_ticks()
         self.walls = walls
-        self.AI = AI.Enemy(self.rect.centerx, self.rect.centery, self.walls, player, self)
+        factories = [AI.SimpleAiFactory(), AI.AllSeeingAiFactory()]
+        factory = random.choice(factories)
+
+        self.AI = factory.create(self.rect.centerx, self.rect.centery, self.walls, player, self)
 
     def go_left(self):
         self.vel_x = -self.speed
@@ -161,8 +171,6 @@ class Enemy(Tank):
 
     @logger
     def update(self, scr, plr):
-        # self.rect.clamp_ip(scr.get_rect())
-
         self.check_obstacles(self.walls)
 
         self.image = self.images[self.direction]
@@ -174,16 +182,15 @@ class Enemy(Tank):
 class FastEnemy(Enemy):
     bullets = pygame.sprite.Group()
 
-    def __init__(self, image, x, y, walls, player, hp=25, speed=3.5):
-        super().__init__(image, x, y, walls, player, hp=hp, speed=speed)
-        self.AI = AI.AllSeeingEnemy(self.rect.centerx, self.rect.centery, self.walls, player, self)
+    def __init__(self, x, y, walls, player, hp=25, speed=3.5):
+        super().__init__(x, y, walls, player, hp=hp, speed=speed, image="textures/fast_enemy.png")
 
 
 class FatEnemy(Enemy):
     bullets = pygame.sprite.Group()
 
-    def __init__(self, image, x, y, walls, player, hp=300, speed=1):
-        super().__init__(image, x, y, walls, player, hp=hp, speed=speed)
+    def __init__(self, x, y, walls, player, hp=300, speed=1):
+        super().__init__(x, y, walls, player, hp=hp, speed=speed, image="textures/fat_enemy.png")
         self.shoot_cooldown = 3500
 
     def shoot(self):
@@ -192,6 +199,21 @@ class FatEnemy(Enemy):
             new_bullet = Bullet("textures/bullet.png", self.rect.centerx, self.rect.centery, self.direction, 10, self, dmg=50)
             Player.bullets.add(new_bullet)
             self.last_shot_time = now
+
+
+class SimpleEnemyFactory(Factory):
+    def create(self, *args):
+        return Enemy(*args)
+
+
+class FastEnemyFactory(Factory):
+    def create(self, *args):
+        return FastEnemy(*args)
+
+
+class FatEnemyFactory(Factory):
+    def create(self, *args):
+        return FatEnemy(*args)
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -285,13 +307,6 @@ class Boost(pygame.sprite.Sprite, ABC):
     @abstractmethod
     def apply_boost(self, player):
         pass
-        # if not self.active:
-        #     if self.boost_type == "hp":
-        #         player.apply_hp_boost(*self.args)
-        #     elif self.boost_type == "speed":
-        #         player.apply_speed_boost(*self.args)
-        #     self.start_time = time.time()
-        #     self.active = True
 
     def update(self, player, scr):
         if not self.active:
@@ -305,20 +320,15 @@ class Boost(pygame.sprite.Sprite, ABC):
     @abstractmethod
     def deactivate_boost(self, player):
         pass
-    #     if self.boost_type == "speed":
-    #         player.remove_speed_boost(*self.args)
-    #     self.kill()
-    #     self.active = False
 
     def is_active(self):
         now = pygame.time.get_ticks()
-        print(self.start_time, self.duration, self.start_time+self.duration, now)
         return self.active and self.start_time + self.duration > now
 
 
 class HealthBoost(Boost):
-    def __init__(self, image, x, y, duration=0, *args):
-        super().__init__(image, x, y, duration, args)
+    def __init__(self, x, y, duration=0, *args):
+        super().__init__("textures/hp_boost.png", x, y, duration, args)
 
     def apply_boost(self, player):
         player.hp.take_damage(-(self.args[0][0]), self.rect.centerx, self.rect.centery)
@@ -330,8 +340,8 @@ class HealthBoost(Boost):
 
 
 class SpeedBoost(Boost):
-    def __init__(self, image, x, y, duration=30, *args):
-        super().__init__(image, x, y, duration, args)
+    def __init__(self, x, y, duration=3000, *args):
+        super().__init__('textures/speed_boost.png', x, y, duration, args)
 
     def apply_boost(self, player):
         if not self.active:
@@ -342,3 +352,14 @@ class SpeedBoost(Boost):
     def deactivate_boost(self, player):
         player.speed -= self.args[0][0]
         self.kill()
+
+
+class HealthBoostFactory(Factory):
+    def create(self, *args):
+        return HealthBoost(*args, 0, 50)
+
+
+class SpeedBoostFactory(Factory):
+    def create(self, *args):
+        return SpeedBoost(*args, 3000, 5)
+

@@ -1,4 +1,5 @@
 import settings
+import map
 from settings import *
 import pygame
 import options
@@ -34,12 +35,10 @@ def go_to_menu():
     change_scene("menu")
 
 
-def go_to_next_level():
+def go_to_next_level(scr):
+    settings.next_level()
     logger.log("next lvl")
-
-
-def restart_game():
-    logger.log('restart game')
+    return restart_game(scr)
 
 
 def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
@@ -71,6 +70,7 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
                 if button_rects[0][1].collidepoint(mouse_pos):
                     logger.log("Гравець нажав Play")
                     change_scene("main")
+                    return restart_game(scr)
                 elif button_rects[1][1].collidepoint(mouse_pos):
                     logger.log("Гравець нажав Level designer")
                 elif button_rects[2][1].collidepoint(mouse_pos):
@@ -84,6 +84,9 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
         clock.tick(FPS)
 
     if SCENE == "main":
+        if world_map is None or plr is None or enemies is None or entities is None or boosts_group is None:
+            world_map, plr, enemies, entities, boosts_group = restart_game(scr)
+        
         scr.fill(BACKGROUND)
 
         for wall in world_map:
@@ -125,10 +128,16 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
         scr.blit(text, text_rect)
 
         UI.create_button(scr, "В меню", 150, 400, 200, 100, BLACK, BLACK, go_to_menu)
-        UI.create_button(scr, "Далі", 450, 400, 200, 100, BLACK, BLACK, go_to_next_level)
+        UI.create_button(scr, "Далі", 450, 400, 200, 100, BLACK, BLACK, lambda: go_to_next_level(scr))
 
         pygame.display.flip()
         clock.tick(FPS)
+
+        # Перевіряємо, чи була натиснута кнопка "Далі"
+        mouse_pos = pygame.mouse.get_pos()
+        if pygame.mouse.get_pressed()[0]:
+            if pygame.Rect(450, 400, 200, 100).collidepoint(mouse_pos):
+                return go_to_next_level(scr)
 
     if SCENE == 'death':
         for event in pygame.event.get():
@@ -141,7 +150,38 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
         scr.blit(text, text_rect)
 
         UI.create_button(scr, "В меню", 150, 400, 200, 100, BLACK, BLACK, go_to_menu)
-        UI.create_button(scr, "Заново", 450, 400, 200, 100, BLACK, BLACK, restart_game)
+        UI.create_button(scr, "Заново", 450, 400, 200, 100, BLACK, BLACK, lambda: restart_game(scr))
 
         pygame.display.flip()
         clock.tick(FPS)
+
+        # Перевіряємо, чи була натиснута кнопка "Заново"
+        mouse_pos = pygame.mouse.get_pos()
+        if pygame.mouse.get_pressed()[0]:
+            if pygame.Rect(450, 400, 200, 100).collidepoint(mouse_pos):
+                return restart_game(scr)
+        
+        
+def restart_game(scr):
+    # Генеруємо нову карту та об'єкти
+    world_map = map.generate_map()
+    plr = map.generate_player()
+    enemies = map.generate_enemy(plr, world_map)
+    
+    # Оновлюємо групу entities
+    entities = pygame.sprite.Group()
+    entities.add(plr)
+    entities.add(enemies)
+
+    # Генеруємо нові бустери
+    boosts_group = map.generate_boosts()
+
+    # Змінюємо сцену на "main"
+    change_scene("main")
+
+    logger.log('restart game')
+
+    # Повертаємо нові об'єкти
+    return world_map, plr, enemies, entities, boosts_group
+
+    
