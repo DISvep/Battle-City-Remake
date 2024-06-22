@@ -29,7 +29,7 @@ class Tank(pygame.sprite.Sprite):
 
         self.stuck = False
 
-        UI.play_sound('sounds/tank.mp3', 0.1, loops=-1, channel=True)
+        UI.play_sound('sounds/tank.mp3', 0.05, loops=-1, channel=1)
 
         self.bullet_speed = 10
         self.dmg = 25
@@ -311,6 +311,7 @@ class Boost(pygame.sprite.Sprite, ABC):
         if not self.active:
             scr.blit(self.image, self.rect)
         if self.rect.colliderect(player.rect) and not self.active:
+            UI.play_sound('sounds/boost.wav', 0.4)
             self.apply_boost(player)
         if self.active:
             if not self.is_active():

@@ -24,6 +24,7 @@ BG_COLOR = (30, 30, 30)
 wall = pygame.transform.scale(pygame.image.load('textures/wall.jpg'), (SIZE_CELL, SIZE_CELL))
 SHOW_FPS = False
 VOLUME = 0.5
+
 LEVELS = [
     ["WWWWWWWWWWWWWWWW",
      "W......W....B..W",
@@ -126,13 +127,16 @@ def change_FPS_show(value):
 
     FPS = value
 
+
 def next_level():
     global CURRENT_LEVEL
+
     CURRENT_LEVEL += 1
     if CURRENT_LEVEL >= len(LEVELS):
         CURRENT_LEVEL = 0  # Повертаємося до першого рівня, якщо всі пройдені
     print(f"Перехід на рівень {CURRENT_LEVEL}")
     return LEVELS[CURRENT_LEVEL]
+
 
 def get_current_text_map():
     return LEVELS[CURRENT_LEVEL]

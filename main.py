@@ -10,6 +10,8 @@ pygame.init()
 start_screen_video = moviepy.editor.VideoFileClip('videos/startgamescreen.mp4')
 start_screen_video.preview()
 
+UI.play_sound('sounds/game.mp3', 1, loops=-1, channel=0)
+
 entities = pygame.sprite.Group()
 
 world_map = map.generate_map()

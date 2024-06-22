@@ -6,20 +6,29 @@ import logger
 
 pygame.font.init()
 pygame.mixer.init()
+pygame.mixer.set_num_channels(10)
+
 font = pygame.font.SysFont(None, 80)
 
 
-def play_sound(path, volume, loops=1, channel=False):
+def pause_sound(channel):
+    pygame.mixer.Channel(channel).pause()
+
+
+def resume_sound(channel):
+    pygame.mixer.Channel(channel).unpause()
+
+
+def play_sound(path, volume, loops=0, channel=2):
     if channel:
         sound = pygame.mixer.Sound(path)
         sound.set_volume(volume)
 
-        channel = pygame.mixer.find_channel(True)
-        channel.play(sound, loops=loops)
+        pygame.mixer.Channel(channel).play(sound, loops=loops)
     else:
-        pygame.mixer.music.load(path)
-        pygame.mixer.music.set_volume(volume)
-        pygame.mixer.music.play(loops)
+        sound = pygame.mixer.Sound(path)
+        sound.set_volume(volume)
+        pygame.mixer.Channel(channel).play(sound, loops=loops)
 
 
 class Text(pygame.sprite.Sprite):

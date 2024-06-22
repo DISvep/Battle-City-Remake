@@ -17,6 +17,9 @@ background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 title_font = pygame.font.Font(None, 80)
 button_font = pygame.font.Font(None, 40)
 
+played_win = False
+played_loose = False
+
 # Текст заголовка
 title_text = title_font.render("Retro City", True, WHITE)
 title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4 + 10))
@@ -33,6 +36,11 @@ for i, button in enumerate(buttons):
 
 
 def go_to_menu():
+    global played_win, played_loose
+
+    UI.resume_sound(0)
+    played_loose = False
+    played_win = False
     change_scene("menu")
 
 
@@ -43,6 +51,8 @@ def go_to_next_level(scr):
 
 
 def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
+    global played_win, played_loose
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return False
@@ -124,6 +134,11 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
             if event.type == pygame.QUIT:
                 return False
 
+        if not played_win:
+            UI.pause_sound(0)
+            UI.play_sound('sounds/win.wav', 1)
+            played_win = True
+
         scr.fill(GREEN)
         text = title_font.render("Ти виграв", True, WHITE)
         text_rect = text.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 100))
@@ -139,12 +154,19 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
         mouse_pos = pygame.mouse.get_pos()
         if pygame.mouse.get_pressed()[0]:
             if pygame.Rect(450, 400, 200, 100).collidepoint(mouse_pos):
+                UI.resume_sound(0)
+                played_win = False
                 return go_to_next_level(scr)
 
     if SCENE == 'death':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+
+        if not played_loose:
+            UI.pause_sound(0)
+            UI.play_sound('sounds/loose.wav', 1)
+            played_loose = True
 
         scr.fill(RED)
         text = title_font.render("Ти програв", True, WHITE)
@@ -161,6 +183,8 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
         mouse_pos = pygame.mouse.get_pos()
         if pygame.mouse.get_pressed()[0]:
             if pygame.Rect(450, 400, 200, 100).collidepoint(mouse_pos):
+                UI.resume_sound(0)
+                played_loose = False
                 return restart_game(scr)
         
         
