@@ -5,6 +5,7 @@ from logger import *
 from settings import *
 import time
 import random
+import animations
 from abc import ABC, abstractmethod
 
 
@@ -246,7 +247,7 @@ class Bullet(pygame.sprite.Sprite):
         self.owner = owner
 
     @logger
-    def update(self, walls, entities):
+    def update(self, walls, entities, effects):
         if self.direction == "up":
             self.rect.y -= self.speed
         elif self.direction == "down":
@@ -264,6 +265,7 @@ class Bullet(pygame.sprite.Sprite):
         collides = pygame.sprite.spritecollide(self, entities, False)
         for sprite in collides:
             if sprite != self.owner and isinstance(sprite, Tank):
+                effects.add(animations.Animation('textures/boom', 0, 50, sprite))
                 sprite.take_damage(self.dmg)
                 UI.play_sound('sounds/hit.mp3', 0.4)
                 self.kill()

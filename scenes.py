@@ -50,7 +50,7 @@ def go_to_next_level(scr):
     return restart_game(scr)
 
 
-def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
+def scenes(scr, plr, world_map, enemies, entities, boosts_group, effects, clock):
     global played_win, played_loose
 
     for event in pygame.event.get():
@@ -118,8 +118,11 @@ def scenes(scr, plr, world_map, enemies, entities, boosts_group, clock):
             change_scene("win")
 
         for bullet in plr.bullets:
-            bullet.update(world_map, entities)
+            bullet.update(world_map, entities, effects)
             bullet.draw(scr)
+
+        for ef in effects:
+            ef.update(scr)
 
         if show_FPS:
             scr.blit(button_font.render(f"{int(clock.get_fps())}", False, WHITE, BLACK), (WIDTH*0.9, 10))

@@ -21,6 +21,8 @@ enemies = map.generate_enemy(plr, world_map)
 entities.add(plr)
 entities.add(enemies)
 
+effects = pygame.sprite.Group()
+
 boosts_group = map.generate_boosts()
 
 scr = pygame.display.set_mode(settings.SIZE)
@@ -29,7 +31,7 @@ game = True
 clock = pygame.time.Clock()
 
 while game != False:
-    result = scenes.scenes(scr, plr, world_map, enemies, entities, boosts_group, clock)
+    result = scenes.scenes(scr, plr, world_map, enemies, entities, boosts_group, effects, clock)
     if isinstance(result, tuple):
         world_map, plr, enemies, entities, boosts_group = result
     else:
